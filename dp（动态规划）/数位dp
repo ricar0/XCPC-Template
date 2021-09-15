@@ -1,0 +1,19 @@
+ll dfs(int pos, int pre, bool limit, bool lead) {
+    if (pos == -1) return 1;
+    if (!limit && !lead && dp[pos][...][...] != -1) return dp[pos][...][...];
+    int End = limit ? a[pos] : 9;
+    ll ans = 0;
+    for (int i = 0; i <= End; i++) {
+        ******//操作1
+    }
+    if (!limit && !lead) dp[pos][...][...] = ans;
+    return ans;
+}
+ll calc(ll x) {
+    int pos = 0;
+    while (x) {
+        a[pos++] = x % 10;
+        x /= 10;
+    }
+    return dfs(pos-1, 0, true, true);
+}

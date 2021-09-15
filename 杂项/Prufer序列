@@ -1,0 +1,23 @@
+vector<int> TreeToPrufer(int n) {// 1~n-2个数
+    vector<int> pru(n+1);
+    vector<int> in(n+1);
+    vector<int> fa(n+1);
+    for (int i = 1; i < n; i++) read(fa[i]), ++in[fa[i]];
+    for (int i = 1, j = 1; i <= n - 2; i++, j++) {
+        while (in[j]) ++j; pru[i] = fa[j];
+        while (i <= n - 2 && !--in[pru[i]] && pru[i] < j) pru[i+1] = fa[pru[i]], ++i;
+    }
+    return pru;
+}
+
+vector<int> PruferToTree(int n) {// 1~n-1个数
+    vector<int> fa(n+1);
+    vector<int> in(n+1);
+    vector<int> pru(n+1);
+    for (int i = 1; i <= n - 2; i++) read(pru[i]), ++in[pru[i]]; pru[n-1] = n;
+    for (int i = 1, j = 1; i < n; i++, j++) {
+        while (in[j]) ++j; fa[j] = pru[i];
+        while (i < n && !--in[pru[i]] && pru[i] < j) fa[pru[i]] = pru[i+1], ++i;
+    }
+    return fa;
+}

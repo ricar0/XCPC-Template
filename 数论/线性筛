@@ -1,0 +1,43 @@
+--------------------------------------------------------//筛质数
+const int N = 1e6 + 5;
+int prime[N];      
+bool is_prime[N];        
+void get_prime(){         
+    int k = 0;        
+    memset(is_prime, true, sizeof is_prime);
+    is_prime[0] = is_prime[1] = false;
+    for(int i = 2 ; i <= N;i++){         
+        if (is_prime[i]) prime[++k] = i;     
+        for(int j = 1; j <= k && i * prime[j] <= N;j++){        
+            is_prime[i * prime[j]] = false;      
+            if(i % prime[j] == 0) break; 
+        }
+    }   
+}
+--------------------------------------------------------//约数和
+int prime[N], cnt;
+bool is_prime[N];
+ll sum[N], e[N];
+
+void init() {
+    memset(is_prime, true, sizeof is_prime);
+    sum[1] = 1;
+    for (int i = 2; i < N; ++i) {
+        if (is_prime[i]) {
+            prime[++cnt] = i;
+            sum[i] = i + 1;
+            e[i] = 1;
+        }
+        for (int j = 1; j <= cnt && 1ll*i * prime[j] < N; ++j) {
+            is_prime[prime[j] * i] = false;
+            if (i % prime[j] == 0) {
+                sum[i * prime[j]] = sum[i] * prime[j] + e[i];
+                e[i * prime[j]] = e[i];
+                break;
+            }
+            sum[i * prime[j]] = sum[i] * (prime[j] + 1);
+            e[i * prime[j]] = sum[i];
+        }
+    }
+}
+

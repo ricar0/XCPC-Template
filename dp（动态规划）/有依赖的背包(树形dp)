@@ -1,0 +1,9 @@
+类似分组背包的思想
+
+for (int j = m; j >= v[i]) 
+    for (int k = 0; k <= j; k++)
+        f[x][j] = max(f[x][j], f[x][j-k] + f[y][k]);
+
+for (int i = m; i >= v[x]; i--) f[x][i-v[x]] + w[x];
+for (int i = 0; i < v[x]; i++) f[x][i] = 0;
+每个子节点为一个组，组内不同的背包容量转移为组内的不同元素

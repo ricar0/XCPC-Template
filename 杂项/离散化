@@ -1,0 +1,10 @@
+struct Hash {
+    int b[N], tot;
+    void init() {tot = 0;}
+    void insert(int x) {b[++tot] = x;}
+    void build() {
+        sort(b+1, b+1+tot);
+        tot = unique(b+1, b+tot+1) - (b+1);
+    }
+    int pos(int x) {return lower_bound(b+1, b+tot+1, x) - b;}
+}ha;

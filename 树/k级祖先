@@ -1,0 +1,21 @@
+vector<int> g[N];
+int dep[N], f[N][30];
+void dfs(int x, int fa) {
+    f[x][0] = fa; dep[x] = dep[fa] + 1;
+    for (int i = 1; i <= 20; i++) {
+        f[x][i] = f[f[x][i-1]][i-1];
+    }
+    for (auto &v : g[x]) {
+        if (v == fa) continue;
+        dfs(v, x);
+    }
+}
+int find_Kth(int x, int k) {
+    int bit = 0;
+    while (k) {
+        if (k & 1) x = f[x][bit];
+        k >>= 1;
+        bit++;
+    }
+    return x;
+}

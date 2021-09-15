@@ -1,0 +1,35 @@
+int rt[N], cnt;//主席树版本
+struct Tree {
+    int ls, rs;
+    int lsum, rsum, tsum;
+}hjt[N*50];
+void push_up(int now, int l, int r) {
+    int mid = (l + r) >> 1;
+    hjt[now].lsum = hjt[hjt[now].ls].lsum;
+    if (hjt[hjt[now].ls].lsum == mid - l + 1) hjt[now].lsum += hjt[hjt[now].rs].lsum;
+    hjt[now].rsum = hjt[hjt[now].rs].rsum;
+    if (hjt[hjt[now].rs].rsum == r - mid) hjt[now].rsum += hjt[hjt[now].ls].rsum;
+    hjt[now].tsum = max(hjt[hjt[now].ls].tsum, hjt[hjt[now].rs].tsum);
+    hjt[now].tsum = max(hjt[now].tsum, hjt[hjt[now].ls].rsum + hjt[hjt[now].rs].lsum);
+}
+void modify(int &now, int pre, int l, int r, int pos, int val) {
+    now = ++cnt;
+    hjt[now] = hjt[pre];
+    if (l == r) {
+        hjt[now].lsum = hjt[now].rsum = hjt[now].tsum = 1;
+        return;
+    }
+    int mid = (l + r) >> 1;
+    if (pos <= mid) modify(hjt[now].ls, hjt[pre].ls, l, mid, pos, val);
+    else modify(hjt[now].rs, hjt[pre].rs, mid+1, r, pos, val);
+    push_up(now, l, r);
+}
+int query(int now, int l, int r, int ql, int qr) {
+    if (ql <= l && qr >= r) return hjt[now].tsum;
+    int mid = (l + r) >> 1;
+    int ans = 0;
+    if (ql <= mid) ans = max(ans, query(hjt[now].ls, l, mid, ql, qr));
+    if (qr > mid) ans = max(ans, query(hjt[now].rs, mid+1, r, ql, qr));
+    ans = max(ans, min(mid-ql+1, hjt[hjt[now].ls].rsum) + min(qr-mid, hjt[hjt[now].rs].lsum));
+    return ans;
+}

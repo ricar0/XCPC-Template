@@ -1,0 +1,56 @@
+vector<int> G1[N], G2[N];
+int in[N], n, m, q[N], idx;
+int f[N][25], dep[N];
+void tupo() {
+    idx = 0; queue<int> que;
+    for (int i = 1; i <= n; i++) {
+        if (!in[i]) que.push(i);
+        if (!G1[i].size()) G1[i].push_back(0), in[0]++;
+    }
+    while (que.size()) {
+        int now = que.front();
+        que.pop();
+        q[++idx] = now;
+        for (auto v : G1[now]) {
+            in[v]--;
+            if (!in[v]) que.push(v);
+        }
+    }
+}
+int lca(int x, int y) {
+    if (dep[x] > dep[y]) swap(x, y);
+    for (int i = 20; i >= 0; i--) if (dep[f[y][i]] >= dep[x]) y = f[y][i];
+
+    if (x == y) return x;
+    for (int i = 20; i >= 0; i--) {
+        if (f[y][i] != f[x][i])
+            y = f[y][i], x = f[x][i];
+    }
+    return f[x][0];
+}
+
+void solve() {
+    int T; cin >> T; while (T--) {
+        cin >> n >> m;
+        for (int i = 0; i <= n; i++) G1[i].clear(), G2[i].clear(), dep[i] = 0;
+        for (int i = 1; i <= m; i++) {
+            int u, v; cin >> u >> v;
+            G1[u].push_back(v);
+            in[v]++;
+        }
+        tupo();
+        for (int i = n; i >= 1; i--) {
+            int now = q[i];
+            if (!G1[now].size()) continue;
+            int _lca = G1[now][0];
+            for (int j = 1; j < G1[now].size(); j++) _lca = lca(_lca, G1[now][j]);
+            f[now][0] = _lca;
+            dep[now] = dep[_lca] + 1;
+            for (int j = 1; j <= 20; j++) f[now][j] = f[f[now][j-1]][j-1];
+        }
+        int qry; cin >> qry; while (qry--) {
+            int x, y; cin >> x >> y;
+            cout << dep[x] + dep[y] - dep[lca(x, y)] << endl;
+        }
+    }
+}

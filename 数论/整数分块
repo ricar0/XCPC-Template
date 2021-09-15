@@ -1,0 +1,6 @@
+void cal(ll a) {
+	for (ll l = 1, r; l <= a; l = r + 1) {
+		r = min(a, (a / (a / l)));
+		ans = (ans + (r - l + 1) % MOD * (a / l));
+	}
+}

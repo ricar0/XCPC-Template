@@ -1,0 +1,9 @@
+ll quick_multi(ll a, ll b){
+    ll ans = 0, base = a;
+    while(b) {
+        if(b & 1) ans = (ans + base) % mod;
+        base = (base << 1) % mod;
+        b >>= 1;
+    }
+    return ans % mod;
+}

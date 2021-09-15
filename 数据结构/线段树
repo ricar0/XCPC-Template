@@ -1,0 +1,33 @@
+//namespace Seg {
+//#define ls (u<<1)
+//#define rs (u<<1|1)
+//#define mid ((l+r)>>1)
+//    ll sum[N<<2], tag[N<<2];
+//    void push_up(int u) {
+//        sum[u] = sum[u<<1] + sum[u<<1|1];
+//    }
+//    void push_down(int u, int l, int r) {
+//        if (tag[u]) {
+//            tag[u<<1] += tag[u];
+//            tag[u<<1|1] += tag[u];
+//            sum[u<<1] += 1ll*(mid-l+1)*tag[u];
+//            sum[u<<1|1] += 1ll*(r-mid)*tag[u];
+//            tag[u] = 0;
+//        }
+//    }
+//    void modify(int u, int ql, int qr, int l, int r, int val) {
+//        if (ql <= l && qr >= r) {
+//            sum[u] += 1ll*(r-l+1)*val;
+//            tag[u] += val;
+//            return;
+//        }
+//        push_down(u, l, r);
+//        if (ql <= mid) modify(ls, ql, qr, l, mid, val);
+//        if (qr > mid) modify(rs, ql, qr, mid+1, r, val);
+//        push_up(u);
+//    }
+//
+//#undef mid
+//#undef ls
+//#undef rs
+//}

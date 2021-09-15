@@ -1,0 +1,5 @@
+for (int sub = S; sub; sub = (sub - 1) & S) {
+	// sub 为 S 的子集
+}
+
+a ^ b = c   -->  c ^ b = a

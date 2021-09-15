@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define fi first
+#define se second
+#define re register
+typedef long long ll;
+typedef pair<int, int> PII;
+typedef unsigned long long ull;
+const int N = 5e5 + 10, M = 1e6 + 5, INF = 1e9;
+const int MOD = 1e9 + 7;
+int n, k, cnt[N], ans[N], f[N];
+struct node {
+    int a, b, c, cnt, id;
+    bool operator < (const node &rhs) {
+        if (a == rhs.a) {
+            if (b == rhs.b) return c < rhs.c;
+            return b < rhs.b;
+        }
+        return a < rhs.a;
+    }
+};
+node p[N], q[N], tmp[N];
+int lowbit(int x) {return x&-x;}
+void add(int x, int c) {
+    for (int i = x; i <= k; i += lowbit(i)) cnt[i] += c;
+}
+int query(int x) {
+    int res = 0;
+    for (int i = x; i > 0; i -= lowbit(i)) res += cnt[i];
+    return res;
+}
+void clear(int x) {
+    for (int i = x; i <= k; i += lowbit(i)) {
+        if (cnt[i]) cnt[i] = 0;
+        else break;
+    }
+}
+void CDQ(int l, int r) {
+    if (l == r) return;
+    int mid = (l + r) >> 1;
+    CDQ(l, mid);
+    CDQ(mid+1, r);
+    int t1 = l, t2 = mid+1;
+    for (int i = l; i <= r; i++) {
+        if ((t1 <= mid && q[t1].b <= q[t2].b) || t2 > r) {
+            add(q[t1].c, q[t1].cnt);
+            tmp[i] = q[t1++];
+        } else {
+            ans[q[t2].id] += query(q[t2].c);
+            tmp[i] = q[t2++];
+        }
+    }
+    for (int i = l; i <= r; i++) q[i] = tmp[i], clear(q[i].c);
+}
+void solve() {
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) cin >> p[i].a >> p[i].b >> p[i].c;
+    sort(p+1, p+n+1);
+    int tot = 0;
+    q[++tot] = {p[1].a, p[1].b, p[1].c, 1, 1};
+    for (int i = 2; i <= n; i++) {
+        if (p[i].a == p[i-1].a && p[i].b == p[i-1].b && p[i].c == p[i-1].c) {
+            q[tot].cnt++;
+        } else {
+            q[++tot] = {p[i].a, p[i].b, p[i].c, 1, tot};
+        }
+    }
+    CDQ(1, tot);
+    for (int i = 1; i <= tot; i++) {
+        f[ans[q[i].id] + q[i].cnt - 1] += q[i].cnt;
+    }
+    for (int i = 0; i < n; i++) printf("%d\n", f[i]);
+}
+
+signed main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+#ifdef ACM_LOCAL
+    freopen("input", "r", stdin);
+    freopen("output", "w", stdout);
+#endif
+    solve();
+    return 0;
+}

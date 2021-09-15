@@ -1,0 +1,79 @@
+
+struct Edge {
+    int to;
+    int cap, dis; //容量、费用
+    int rev;      //(u,v)的反向弧中,v在u的位置
+    Edge() {}
+    Edge(int to, int cap, int dis, int rev): to(to), cap(cap), dis(dis), rev(rev) {}
+};
+vector<Edge> G[N];
+struct Pre {  //记录前驱
+    int node; //前驱结点
+    int edge; //对应的边
+} pre[N];
+int h[N];   //势能函数
+ll dis[N]; //费用
+void addEdge(int x, int y, int cap, int cost) {
+    G[x].push_back(Edge(y, cap, cost, (int)G[y].size()));      //正向边
+    G[y].push_back(Edge(x, 0, -cost, (int)(G[x].size() - 1))); //反向边
+}
+bool Dijkstra(int S, int T) {
+    memset(dis, 0x3f3f3f3f, sizeof dis);
+    dis[S] = 0;
+
+    priority_queue<PII, vector<PII>, greater<PII>> Q;
+    Q.push(PII(dis[S], S));
+    while (!Q.empty()) {
+        PII now = Q.top();
+        Q.pop();
+
+        int u = now.second;
+        if (dis[u] < now.first)
+            continue;
+
+        for (int i = 0; i < G[u].size(); i++) {
+            int v = G[u][i].to;
+            int cap = G[u][i].cap;
+            int w = G[u][i].dis;
+            if (cap && dis[v] > w + dis[u] + h[u] - h[v]) {
+                dis[v] = w + dis[u] + h[u] - h[v]; //进行松弛
+                pre[v].node = u;                   //记录前驱点
+                pre[v].edge = i;                   //记录前驱边
+                Q.push(PII(dis[v], v));
+            }
+        }
+    }
+    if (dis[T] == INF)
+        return false;
+    else {
+        for (int i = 0; i <= T + 1; i++) //对于势能函数，每次加上当前轮的dis
+            h[i] += dis[i];
+        return true;
+    }
+}
+void maxFlow(int S, int T, int &flow, ll &cost) {//flow 代表最大总流量
+    memset(h, 0, sizeof(h));
+    memset(pre, 0, sizeof(pre));
+
+    int newFlow = 0;                 //增广流量
+    while (flow && Dijkstra(S, T)) { //当无法增广时，即找到答案
+        int minn = INF;
+        for (int i = T; i != S; i = pre[i].node) {
+            int node = pre[i].node;
+            int edge = pre[i].edge;
+            minn = min(minn, G[node][edge].cap);
+        }
+
+        flow -= minn;        //原流量
+        newFlow += minn;     //增广流量
+        cost += 1ll * h[T] * minn; //增广流花销
+
+        for (int i = T; i != S; i = pre[i].node) {
+            int node = pre[i].node;
+            int edge = pre[i].edge;
+            int rev = G[node][edge].rev;
+            G[node][edge].cap -= minn;
+            G[i][rev].cap += minn;
+        }
+    }
+}

@@ -1,0 +1,27 @@
+inline int read(){
+   int s=0,w=1;
+   char ch=getchar();
+   while(ch<'0'||ch>'9'){if(ch=='-')w=-1;ch=getchar();}
+   while(ch>='0'&&ch<='9') s=s*10+ch-'0',ch=getchar();
+   return s*w;
+}
+
+-----------------------------------------------------------------------------
+namespace StandardIO {
+    inline char nc() {
+        static char buf[1000000],*p1=buf,*p2=buf;
+        return p1==p2&&(p2=(p1=buf)+fread(buf,1,1000000,stdin),p1==p2)?EOF:*p1++;
+    }
+    template <typename _Tp> inline void read(_Tp&sum) {
+        char ch=nc();sum=0;
+        while(!(ch>='0'&&ch<='9')) ch=nc();
+        while(ch>='0'&&ch<='9') sum=(sum<<3)+(sum<<1)+(ch-48),ch=nc();
+    }
+
+    template<typename T>
+    inline void write(T x) {
+        if (x < 0) putchar('-'), x *= -1;
+        if (x >= 10) write(x / 10);
+        putchar(x % 10 + '0');
+    }
+}

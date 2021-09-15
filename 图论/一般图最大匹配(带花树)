@@ -1,0 +1,74 @@
+struct Edge {
+    int to, next;
+} e[M];
+int cnt, n, m, nn, h[N], fa[N], match[N], pre[N], tic[N], tim, ty[N];
+queue<int> que;
+void add(int u, int v) {
+    e[cnt].to = v;
+    e[cnt].next = h[u];
+    h[u] = cnt++;
+}
+
+int find(int x) { return x == fa[x] ? x : fa[x] = find(fa[x]); }
+
+int lca(int x, int y) {
+    for (tim++;; swap(x, y))
+        if (x) {
+            x = find(x);
+            if (tic[x] == tim) return x;
+            tic[x] = tim;
+            x = pre[match[x]];
+        }
+}
+
+void shrink(int x, int y, int p) {
+    while (find(x) != p) {
+        pre[x] = y;
+        y = match[x];
+        if (ty[y] == 2) ty[y] = 1, que.push(y);
+        if (find(x) == x) fa[x] = p;
+        if (find(y) == y) fa[y] = p;
+        x = pre[y];
+    }
+}
+
+bool aug(int s) {
+    for (int i = 1; i <= n; i++) fa[i] = i, ty[i] = pre[i] = 0;
+    while (!que.empty()) que.pop();
+    que.push(s); ty[s] = 1;
+    while (!que.empty()) {
+        int x = que.front();
+        que.pop();
+        for (int i = h[x], y = e[i].to; ~i; i = e[i].next, y = e[i].to) {
+            if (find(x) == find(y) || ty[y] == 2) continue;
+            if (!ty[y]) {
+                ty[y] = 2;
+                pre[y] = x;
+                if (!match[y]) {
+                    for (int tmp; y; y = tmp, x = pre[y])
+                        tmp = match[x], match[x] = y, match[y] = x;
+                    return 1;
+                } else ty[match[y]] = 1, que.push(match[y]);
+            } else if (ty[y] == 1) {
+                int p = lca(x, y);
+                shrink(x, y, p);
+                shrink(y, x, p);
+            }
+        }
+    }
+    return 0;
+}
+int calc() {
+    int ans = 0;
+    for (int i = 1; i <= n; i++) {
+        if (!match[i] && aug(i)) ans++;
+    }
+    return ans;
+}
+void init() {
+    for (int i = 1; i <= n; i++) {
+        match[i] = tic[i] = 0;
+        h[i] = -1;
+    }
+    cnt = tim = 0;
+}

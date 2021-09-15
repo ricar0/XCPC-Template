@@ -1,0 +1,22 @@
+struct HashSet {
+    const int mod = 1000009;
+    struct node {
+        int k, v, nex;
+    } buf[N];
+    int h[N], tot;
+    void ins(int x) {
+        int pos = x % mod;
+        for (int i=h[pos]; i; i=buf[i].nex) {
+            if (buf[i].k == x) { buf[i].v++; return ; }
+        }
+        buf[++tot] = (node){x, 1, h[pos]};
+        h[pos] = tot;
+    }
+    int find(int x) {
+        int pos = x % mod;
+        for (int i=h[pos]; i; i=buf[i].nex) {
+            if (buf[i].k == x) return buf[i].v;
+        }
+        return 0;
+    }
+} H;

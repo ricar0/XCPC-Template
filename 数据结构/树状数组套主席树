@@ -1,0 +1,174 @@
+//单点修改动态区间k大
+#include <bits/stdc++.h>
+#define lowbit(i) i & -i
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> PII;
+const ll INF = 1e18;
+const int N = 1e5 + 10;
+const int M = 1e6 + 10;
+const int MOD = 1e9 + 7;
+struct Segtree {
+    int ls, rs;
+    int sum;
+}t[N * 400];
+int tot, n, m, rt[N], a[N], cnt[2], tmp[2][20], b[N];
+void modify(int &now, int l, int r, int pos, int val) {
+    if (!now) now = ++tot;
+    if (l == r) {
+        t[now].sum += val;
+        return;
+    }
+    int mid = (l + r) >> 1;
+    if (pos <= mid) modify(t[now].ls, l, mid, pos, val);
+    else modify(t[now].rs, mid + 1, r, pos, val);
+    t[now].sum = t[t[now].ls].sum + t[t[now].rs].sum;
+}
+void prepare_modify(int x, int val) {
+    for (int i = x; i <= n; i += lowbit(i)) {
+        modify(rt[i], 1, 10, a[x], val);//预处理出修改哪log棵主席树
+    }
+}
+int query(int l, int r, int k) {
+    if (l == r) return l;
+    int mid = (l + r) >> 1, sum = 0;
+    for (int i = 1; i <= cnt[1]; i++) sum += t[t[tmp[1][i]].ls].sum;
+    for (int i = 1; i <= cnt[0]; i++) sum -= t[t[tmp[0][i]].ls].sum;
+    if (k <= sum) {
+        for (int i = 1; i <= cnt[1]; i++) tmp[1][i] = t[tmp[1][i]].ls;
+        for (int i = 1; i <= cnt[0]; i++) tmp[0][i] = t[tmp[0][i]].ls;
+        return query(l, mid, k);
+    } else {
+        for (int i = 1; i <= cnt[1]; i++) tmp[1][i] = t[tmp[1][i]].rs;
+        for (int i = 1; i <= cnt[0]; i++) tmp[0][i] = t[tmp[0][i]].rs;
+        return query(mid + 1, r, k - sum);
+    }
+}
+int prepare_query(int l, int r, int k) {//处理出需要进行加减操作的log棵主席树
+    memset(tmp, 0, sizeof tmp);
+    memset(cnt, 0, sizeof cnt);
+    for (int i = r; i > 0; i -= lowbit(i)) tmp[1][++cnt[1]] = rt[i];
+    for (int i = l - 1; i > 0; i -= lowbit(i)) tmp[0][++cnt[0]] = rt[i];
+    return query(1, 10, k);
+}
+void solve() {
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+    }
+    for (int i = 1; i <= n; i++) prepare_modify(i, 1);
+    while(m--) {
+        char op; cin >> op;
+        if (op == 'Q') {
+            int l, r, k; cin >> l >> r >> k;
+            cout << prepare_query(l, r, k) << endl;
+        } else {
+            int x, y; cin >> x >> y;
+            prepare_modify(x, -1);
+            a[x] = y;
+            prepare_modify(x, 1);
+        }
+    }
+}
+
+//区间修改，区间K大
+#include <bits/stdc++.h>
+#define lowbit(i) i & -i
+#define Debug(x) cout << x << endl
+#define fi first
+#define se second
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> PII;
+const ll INF = 1e18;
+const int N = 5e4 + 10;
+const int M = 1e6 + 10;
+const int MOD = 1e9 + 7;
+struct Segment {
+    int ls, rs;
+    ll sum, lazt;
+} t[N * 400];
+int rt[N << 2], tot, n, m, b[N], len;
+
+void push_down(int now, int l, int r) {
+    if (t[now].lazt) {
+        int mid = (l + r) >> 1;
+        if (!t[now].ls) t[now].ls = ++tot;
+        if (!t[now].rs) t[now].rs = ++tot;
+        t[t[now].ls].lazt += t[now].lazt;
+        t[t[now].rs].lazt += t[now].lazt;
+        t[t[now].ls].sum += 1ll*(mid - l + 1) * t[now].lazt;
+        t[t[now].rs].sum += 1ll*(r - mid) * t[now].lazt;
+        t[now].lazt = 0;
+    }
+}
+
+void update(int &now, int ql, int qr, int l, int r) {
+    if (!now) now = ++tot;
+    if (ql <= l && qr >= r) {
+        t[now].sum += r - l + 1;
+        t[now].lazt++;
+        return;
+    }
+    push_down(now, l, r);
+    int mid = (l + r) >> 1;
+    if (ql <= mid) update(t[now].ls, ql, qr, l, mid);
+    if (qr > mid) update(t[now].rs, ql, qr, mid + 1, r);
+    t[now].sum = t[t[now].ls].sum + t[t[now].rs].sum;
+}
+
+void add(int u, int ql, int qr, int pos, int l, int r) {
+    update(rt[u], ql, qr, 1, n);
+    if (l == r) return;
+    int mid = (l + r) >> 1;
+    if (pos <= mid) add(u << 1, ql, qr, pos, l, mid);
+    else add(u << 1 | 1, ql, qr, pos, mid + 1, r);
+}
+
+ll getsum(int &now, int ql, int qr, int l, int r) {
+    if (!now) return 0;
+    if (ql <= l && qr >= r) return t[now].sum;
+    push_down(now, l, r);
+    int mid = (l + r) >> 1;
+    ll ans = 0;
+    if (ql <= mid) ans += getsum(t[now].ls, ql, qr, l, mid);
+    if (qr > mid) ans += getsum(t[now].rs, ql, qr, mid + 1, r);
+    return ans;
+}
+
+int query(int u, int ql, int qr, ll k, int l, int r) {
+    if (l == r) return b[l];
+    int mid = (l + r) >> 1;
+    ll num = getsum(rt[u<<1|1], ql, qr, 1, n);
+    if (k > num) return query(u<<1, ql, qr, k - num, l, mid);
+    else return query(u<<1|1, ql, qr, k, mid + 1, r);
+}
+
+struct Query {
+    ll op, l, r, c;
+} q[N];
+
+void solve() {
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        cin >> q[i].op;
+        if (q[i].op == 1) {
+            cin >> q[i].l >> q[i].r >> q[i].c;
+            b[++len] = q[i].c;
+        } else {
+            cin >> q[i].l >> q[i].r >> q[i].c;
+        }
+    }
+    sort(b + 1, b + len + 1);
+    len = unique(b + 1, b + len + 1) - b - 1;
+    for (int i = 1; i <= m; i++) {
+        if (q[i].op == 1) {
+            q[i].c = lower_bound(b + 1, b + len + 1, q[i].c) - b;
+            add(1, q[i].l, q[i].r, q[i].c, 1, len);
+        } else {
+            printf("%d\n", query(1, q[i].l, q[i].r, q[i].c, 1, len));
+        }
+    }
+}
+
+

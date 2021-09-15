@@ -1,0 +1,42 @@
+ll f[N];
+ll ksm(ll a, ll b) {
+    ll res = 1, base = a;
+    while (b) {
+        if (b & 1) res = res * base % MOD;
+        base = base * base % MOD;
+        b >>= 1;
+    }
+    return res;
+}
+void init() {
+    f[0] = 1;
+    for (ll i = 1; i < N; i++) f[i] = f[i-1] * i % MOD;
+}
+ll C(ll a, ll b) {
+    if (a < 0 || b < 0 || b > a) return 0;
+    return f[a] * ksm(f[a-b], MOD-2) % MOD * ksm(f[b], MOD-2) % MOD;
+}
+----------------------------------------------------------------//卢卡斯定理
+ll f[N];
+ll ksm(ll a, ll b, ll mm) {
+    ll res = 1, base = a;
+    while (b) {
+        if (b & 1) res = res * base % mm;
+        base = base * base % mm;
+        b >>= 1;
+    }
+    return res;
+}
+void init(ll mm) {
+    f[0] = 1;
+    for (ll i = 1; i < N; i++) f[i] = f[i-1] * i % mm;
+}
+ll C(ll a, ll b, ll mm) {
+    if (a < 0 || b < 0 || b > a) return 0;
+    return f[a] * ksm(f[a-b], mm-2, mm) % mm * ksm(f[b], mm-2, mm) % mm;
+}
+
+ll lucas(ll a,ll b,ll mm) {
+    if(b == 0) return 1;
+    return C(a % mm,b % mm,mm) * lucas(a / mm,b / mm,mm) % mm;
+}

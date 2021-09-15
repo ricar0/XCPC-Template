@@ -1,0 +1,8 @@
+int block = sqrt(n);
+int num = n / block + (n % block ? 1 : 0);
+for (int i = 1; i <= num; i++) {
+    l[i] = (i - 1) * block + 1;
+    r[i] = i * block;
+}
+r[num] = n;
+for (int i = 1; i <= n; i++) belong[i] = (i - 1) / block + 1;

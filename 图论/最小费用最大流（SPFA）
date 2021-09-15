@@ -1,0 +1,71 @@
+typedef long long ll;
+typedef pair<int, int> PII;
+const int N = 1e4 + 10, M = 2e5 + 10, INF = 0x3f3f3f3f;
+const int MOD = 1e9 + 7;
+int st, ed;
+struct node {
+    int maxflow, mincost, cnt;
+    int vis[N], dis[N], pre[N], last[N], h[N], flow[N];
+    struct edge {
+        int to, next, cap, cos;
+    } e[M << 1];
+
+    void add(int u, int v, int cap, int cos) {
+        e[cnt].to = v;
+        e[cnt].cap = cap;
+        e[cnt].cos = cos;
+        e[cnt].next = h[u];
+        h[u] = cnt++;
+
+        e[cnt].to = u;
+        e[cnt].cap = 0;
+        e[cnt].cos = -cos;
+        e[cnt].next = h[v];
+        h[v] = cnt++;
+    }
+
+    void init() {
+        memset(h, -1, sizeof h);
+        cnt = 0;
+        mincost = maxflow = 0;
+    }
+    bool spfa() {
+        queue<int> q;
+        for (int i = 0; i <= ed; i++) dis[i] = INF, vis[i] = 0;
+        vis[st] = 1, dis[st] = 0, flow[st] = INF;
+        q.push(st);
+        while (q.size()) {
+            int u = q.front();
+            q.pop(); vis[u] = 0;
+            for (int i = h[u]; ~i; i = e[i].next) {
+                int v = e[i].to;
+                if (e[i].cap && dis[v] > dis[u] + e[i].cos) {
+                    dis[v] = e[i].cos + dis[u];
+                    flow[v] = min(flow[u], e[i].cap);
+                    pre[v] = u;
+                    last[v] = i;
+                    if (!vis[v]) {
+                        vis[v] = 1;
+                        q.push(v);
+                    }
+                }
+            }
+        }
+        if (dis[ed] != INF) return true;
+        else return false;
+    }
+
+    void MCMF() {
+        while (spfa()) {
+            int now = ed;
+            maxflow += flow[ed];
+            mincost += flow[ed] * dis[ed];
+
+            while (st != now) {
+                e[last[now]].cap -= flow[ed];
+                e[last[now] ^ 1].cap += flow[ed];
+                now = pre[now];
+            }
+        }
+    }
+}mcmf;
