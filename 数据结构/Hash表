@@ -1,3 +1,4 @@
+//手写哈希表
 struct HashSet {
     const int mod = 1000009;
     struct node {
@@ -20,3 +21,48 @@ struct HashSet {
         return 0;
     }
 } H;
+
+//支持单点修改的hash
+const int N = 2e6 + 10, M = 1e6 + 10;
+const int mod = 1e9 + 7;
+char s[N];
+int n, m;
+ll f[N];
+struct BIT {
+    ll c[N];
+    int lowbit(int x) {return x&-x;}
+    void add(int x, ll val) {
+        for (int i = x; i <= n; i += lowbit(i)) c[i] = (c[i] + val) % mod;
+    }
+    ll qry(int x) {
+        ll res = 0;
+        for (int i = x; i > 0; i -= lowbit(i)) res = (res + c[i]) % mod;
+        return res;
+    }
+    ll query(int l, int r) {
+        return (qry(r) - qry(l-1) + mod) % mod;
+    }
+    bool comp(int l1, int r1, int l2, int r2) {
+        return query(l1, r1)*f[l2-l1] % mod == query(l2, r2);
+    }
+    bool check(int l1, int r1, int l2, int r2) {
+        if (l1 == r1) return true;
+        int mid1 = (l1 + r1) >> 1;
+        int mid2 = (l2 + r2) >> 1;
+        bool f1 = comp(l1, mid1, l2, mid2);
+        bool f2 = comp(mid1+1, r1, mid2+1, r2);
+        if (!f1 && !f2) return false;
+        if (!f1) return check(l1, mid1, l2, mid2);
+        else return check(mid1+1, r1, mid2+1, r2);
+    }
+}bit;
+void init() {
+    f[0] = 1;
+    for (int i = 1; i <= n; i++) f[i] = f[i-1] * 2333 % mod;
+    for (int i = 1; i <= n; i++) bit.add(i, s[i] * f[i] % mod);
+}
+
+修改操作：将x位置的改为c
+bit.add(x, (c-s[x]+mod)%mod*f[x]%mod);
+s[x] = c;
+
