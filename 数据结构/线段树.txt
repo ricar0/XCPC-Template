@@ -1,0 +1,131 @@
+namespace Seg {
+#define ls (u<<1)
+#define rs (u<<1|1)
+#define mid ((l+r)>>1)
+   ll sum[N<<2], tag[N<<2];
+   void push_up(int u) {
+       sum[u] = sum[u<<1] + sum[u<<1|1];
+   }
+   void push_down(int u, int l, int r) {
+       if (tag[u]) {
+           tag[u<<1] += tag[u];
+           tag[u<<1|1] += tag[u];
+           sum[u<<1] += 1ll*(mid-l+1)*tag[u];
+           sum[u<<1|1] += 1ll*(r-mid)*tag[u];
+           tag[u] = 0;
+       }
+   }
+   void modify(int u, int ql, int qr, int l, int r, int val) {
+       if (ql <= l && qr >= r) {
+           sum[u] += 1ll*(r-l+1)*val;
+           tag[u] += val;
+           return;
+       }
+       push_down(u, l, r);
+       if (ql <= mid) modify(ls, ql, qr, l, mid, val);
+       if (qr > mid) modify(rs, ql, qr, mid+1, r, val);
+       push_up(u);
+   }
+
+#undef mid
+#undef ls
+#undef rs
+}
+
+一些技巧
+
+1)找到最左端满足条件的位置：
+
+1. 二分+线段树 复杂度是nlogn^2
+
+2. 直接在线段树上找 复杂度是nlogn
+
+int query(int u, int L, int R, int val) {
+    if (t[u].mi > val) return 2e9;
+    if (t[u].l == t[u].r)return t[u].l;
+    int mid = t[u].l + t[u].r >> 1;
+    if (L <= t[u].l && R >= t[u].r) {
+        if (t[u<<1].mi <= val) return query(u<<1, t[u].l, mid, val);
+        else return query(u<<1|1, mid + 1, t[u].r, val);
+    }
+    else {
+        if (R <= mid)return query(u<<1, L, R, val);
+        else if (L > mid)return query(u<<1|1, L, R, val);
+        else return min(query(u<<1, L, mid, val), query(u<<1|1, mid + 1, R, val));
+    }
+}
+
+2)势能线段树(均摊时间复杂度)
+
+1. 区间与，单点修改，区间max
+
+struct node {
+    int l, r;
+    int Or, And, Max, tag;
+}t[N<<2];
+int a[N];
+void push_up(int u) {
+    t[u].Or = t[u<<1].Or | t[u<<1|1].Or;
+    t[u].And = t[u<<1].And & t[u<<1|1].And;
+    t[u].Max = max(t[u<<1].Max, t[u<<1|1].Max);
+}
+void push_down(int u) {
+    if (t[u].tag != 0) {
+        t[u<<1].tag += t[u].tag;
+        t[u<<1|1].tag += t[u].tag;
+        t[u<<1].Max += t[u].tag;
+        t[u<<1|1].Max += t[u].tag;
+        t[u<<1].And += t[u].tag;
+        t[u<<1|1].And += t[u].tag;
+        t[u<<1].Or += t[u].tag;
+        t[u<<1|1].Or += t[u].tag;
+        t[u].tag = 0;
+    }
+}
+void build(int u, int l, int r) {
+    t[u].l = l, t[u].r = r;
+    if (l == r) {
+        t[u].Or = t[u].And = t[u].Max = a[l];
+        return;
+    }
+    int mid = (l + r) >> 1;
+    build(u<<1, l, mid);
+    build(u<<1|1, mid+1, r);
+    push_up(u);
+}
+void modify(int u, int ql, int qr, int val) {
+    if ((t[u].Or & val) == t[u].Or) return;
+    if (ql <= t[u].l && qr >= t[u].r && (t[u].Or & val) - t[u].Or == (t[u].And & val) - t[u].And) {
+        int tmp = (t[u].Or & val) - t[u].Or;
+        t[u].And += tmp;
+        t[u].Or += tmp;
+        t[u].Max += tmp;
+        t[u].tag += tmp;
+        return;
+    }
+    push_down(u);
+    int mid = (t[u].l + t[u].r) >> 1;
+    if (ql <= mid) modify(u<<1, ql, qr, val);
+    if (qr > mid) modify(u<<1|1, ql, qr, val);
+    push_up(u);
+}
+void update(int u, int pos, int val) {
+    if (t[u].l == t[u].r) {
+        t[u].Max = t[u].Or = t[u].And = val;
+        return;
+    }
+    push_down(u);
+    int mid = (t[u].l + t[u].r) >> 1;
+    if (pos <= mid) update(u<<1, pos, val);
+    else update(u<<1|1, pos, val);
+    push_up(u);
+}
+int query(int u, int ql, int qr) {
+    if (ql <= t[u].l && qr >= t[u].r) return t[u].Max;
+    push_down(u);
+    int mid = (t[u].l + t[u].r) >> 1;
+    int ans = 0;
+    if (ql <= mid) ans = max(ans, query(u<<1, ql, qr));
+    if (qr > mid) ans = max(ans, query(u<<1|1, ql, qr));
+    return ans;
+}
