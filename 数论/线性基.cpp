@@ -17,6 +17,24 @@ struct LinerBase {
         }
         isZero = true;
     }
+    bool find(ll x)
+    {
+        for(int i = MAX_BIT; i >= 0; i--) if(x&(1ll<<(ll)i)) x^=num[i];
+        return x == 0;
+    }
+    ll ma() {
+        ll ans = 0;
+        for (int i = MAX_BIT; i >= 0; i--) {
+            if ((ans ^ num[i]) > ans) ans ^= num[i];
+        }
+        return ans;
+    }
+    ll mi() {
+        if (isZero) return 0;
+        for (int i = 0; i <= MAX_BIT; i++) {
+            if (num[i]) return num[i];
+        }
+    }
     int countNumber() {
         int cnt = 0;
         for (int i = 0; i <= MAX_BIT; i++) if (num[i] & (1ll << i)) cnt++;
@@ -41,5 +59,8 @@ struct LinerBase {
             if (k & (1ll << i)) ans ^= tmp[i];
         }
         return ans;
+    }
+    ll elementnum() {
+        return (1ll<<countNumber())-!isZero;
     }
 }lb;
