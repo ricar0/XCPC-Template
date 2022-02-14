@@ -1,0 +1,16 @@
+int trie[N*30][2], cnt[N*30], tot, rt[N];
+void insert(int dep, int x, int v, int &u) {
+    u = ++tot;
+    trie[u][0] = trie[v][0];
+    trie[u][1] = trie[v][1];
+    cnt[u] = cnt[v] + 1;
+    if (dep < 0) return;
+    int bit = x >> dep & 1;
+    insert(dep-1, x, trie[v][bit], trie[u][bit]);
+}
+int qry(int dep, int x, int v, int u) {
+    if (dep < 0) return 0;
+    int bit = x >> dep & 1;
+    if (cnt[trie[u][!bit]]>cnt[trie[v][!bit]]) return qry(dep-1, x, trie[v][!bit], trie[u][!bit]) + (1<<dep);
+    else return qry(dep-1, x, trie[v][bit], trie[u][bit]);
+}
