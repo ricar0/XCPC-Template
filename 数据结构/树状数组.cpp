@@ -27,3 +27,29 @@ ll query(int x, int y) {
     return ask(y) - ask(x-1);
 }
 
+------------------------------------------------------------------------------
+template <typename T>
+struct BIT {
+	const int n;
+	vector<T> a;
+	BIT(int n) :n(n), a(n){}
+	void add(int x, T v) {
+		for (int i = x; i <= n; i += i&-i) {
+			a[i] += v;
+		}
+	}
+	void rangeAdd(int x, int y, T v) {
+		add(x, v);
+		add(y+1, -v);
+	}
+	T sum(int x) {
+		T ans = 0;
+		for (int i = x; i > 0; i -= i & -i) {
+			ans += a[i];
+		}
+		return ans;
+	}
+	T rangeSum(int l, int r) {
+		return sum(r) - sum(l-1);
+	}
+};
