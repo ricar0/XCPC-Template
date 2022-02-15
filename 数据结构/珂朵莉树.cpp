@@ -50,7 +50,7 @@ IT split(int pos) {
     return s.insert(node(pos, R, val)).first;
 }
 
-void push_down(int l, int r, ll val) {
+void push_down(int l, int r, ll val) {//区间覆盖操作
     IT itr = split(r+1), itl = split(l);
     s.erase(itl, itr);
     s.insert(node(l, r, val));
