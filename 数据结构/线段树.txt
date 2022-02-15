@@ -1,36 +1,69 @@
-namespace Seg {
-#define ls (u<<1)
-#define rs (u<<1|1)
-#define mid ((l+r)>>1)
-   ll sum[N<<2], tag[N<<2];
-   void push_up(int u) {
-       sum[u] = sum[u<<1] + sum[u<<1|1];
-   }
-   void push_down(int u, int l, int r) {
-       if (tag[u]) {
-           tag[u<<1] += tag[u];
-           tag[u<<1|1] += tag[u];
-           sum[u<<1] += 1ll*(mid-l+1)*tag[u];
-           sum[u<<1|1] += 1ll*(r-mid)*tag[u];
-           tag[u] = 0;
-       }
-   }
-   void modify(int u, int ql, int qr, int l, int r, int val) {
-       if (ql <= l && qr >= r) {
-           sum[u] += 1ll*(r-l+1)*val;
-           tag[u] += val;
-           return;
-       }
-       push_down(u, l, r);
-       if (ql <= mid) modify(ls, ql, qr, l, mid, val);
-       if (qr > mid) modify(rs, ql, qr, mid+1, r, val);
-       push_up(u);
-   }
-
-#undef mid
-#undef ls
-#undef rs
-}
+template <typename T>
+struct Seg {
+	const int n;
+	vector<T> lazy, sum, mx, mn;
+	Seg(int n) : n(n<<2), sum(n<<2), mx(n<<2), mn(n<<2), lazy(n<<2) {}
+	void push_down(int u, int l, int r) {
+		int mid = (l + r) >> 1;
+		if (lazy[u]) {
+			lazy[u<<1] += lazy[u];
+			lazy[u<<1|1] += lazy[u];
+			mx[u<<1] += lazy[u];
+			mx[u<<1|1] += lazy[u];
+			mn[u<<1] += lazy[u];
+			mn[u<<1|1] += lazy[u];
+			sum[u<<1] += lazy[u] * (mid-l+1);
+			sum[u<<1|1] += lazy[u] * (r-mid);
+			lazy[u] = 0;
+		}
+	}
+	void push_up(int u) {
+		sum[u] = sum[u<<1] + sum[u<<1|1];
+		mx[u] = max(mx[u<<1], mx[u<<1|1]);
+		mn[u] = min(mn[u<<1], mn[u<<1|1]);
+	} 
+	void modify(int u, int l, int r, int ql, int qr, T v) {
+		if (ql <= l && qr >= r) {
+			sum[u] += v * (r-l+1);
+			mx[u] += v;
+			mn[u] += v;
+			lazy[u] += v;
+			return;
+		}
+		push_down(u, l, r);
+		int mid = (l + r) >> 1;
+		if (ql <= mid) modify(u<<1, l, mid, ql, qr, v);
+		if (qr > mid) modify(u<<1|1, mid+1, r, ql, qr, v);
+		push_up(u);
+	}
+	T qrySum(int u, int l, int r, int ql, int qr) {
+		if (ql <= l && qr >= r) return sum[u];
+		push_down(u, l, r);
+		int mid = (l + r) >> 1;
+		T ans = 0;
+		if (ql <= mid) ans += qrySum(u<<1, l, mid, ql, qr);
+		if (qr > mid) ans += qrySum(u<<1|1, mid+1, r, ql, qr);
+		return ans;
+	}
+	T qryMin(int u, int l, int r, int ql, int qr) {
+		if (ql <= l && qr >= r) return mn[u];
+		push_down(u, l, r);
+		int mid = (l + r) >> 1;
+		T ans = 1e18;
+		if (ql <= mid) ans = min(ans,qryMin(u<<1, l, mid, ql, qr));
+		if (qr > mid) ans = min(ans,qryMin(u<<1|1, mid+1, r, ql, qr));
+		return ans;
+	}
+	T qryMax(int u, int l, int r, int ql, int qr) {
+		if (ql <= l && qr >= r) return mx[u];
+		push_down(u, l, r);
+		int mid = (l + r) >> 1;
+		T ans = -1e18;
+		if (ql <= mid) ans = max(ans,qryMax(u<<1, l, mid, ql, qr));
+		if (qr > mid) ans = max(ans,qryMax(u<<1|1, mid+1, r, ql, qr));
+		return ans;
+	}
+};
 
 一些技巧
 
