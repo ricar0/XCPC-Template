@@ -1,19 +1,25 @@
 // xi连续,k为多项式幂次,求第n项,复杂度O(k)
-void get_inv() {  
-    inv[1] = 1;
-    for(int i = 2; i <= mod; i++)
-        inv[i] = (ll)(mod - mod / i) * inv[mod % i] % mod;
+ll pre[N], suf[N], fac[N];
+ll ksm(ll a, ll b) {
+    ll res = 1, base = a;
+    while (b) {
+        if (b & 1) res = res * base % mod;
+        base = base * base % mod;
+        b >>= 1;
+    }
+    return res;
 }
 ll largrange(ll *f, ll n, int k) {
     if (n <= k) return f[n];
     ll ans = 0;
-    pre[0] = 1, suf[k+1] = 1;
+    pre[0] = 1, suf[k+1] = 1, fac[0] = 1;
+    for (int i = 1; i <= k; i++) fac[i] = fac[i-1] * i % mod;
     for (int i = 0; i <= k; i++) pre[i] = pre[max(0, i - 1)] * (n - i) % mod;
     for (int i = k; i >= 0; i--) suf[i] = suf[i + 1] * (n - i) % mod;
     for (int i = 0; i <= k; i++) {
         ll tmp = f[i] * (i == 0 ? 1 : pre[i-1]) % mod * suf[i+1] % mod;
         ll mm = fac[i] * fac[k-i] % mod;
-        ans = (ans + tmp * inv[mm] % mod * ((k-i)%2 == 1 ? -1 : 1) % mod + mod) % mod;
+        ans = (ans + tmp * ksm(mm,mod-2) % mod * ((k-i)%2 == 1 ? -1 : 1) % mod + mod) % mod;
     }
     return ans;
 }
