@@ -1,25 +1,22 @@
-typedef long long ll;
-typedef pair<int, int> PII;
-const int N = 1e3 + 10, M = 2e5 + 10, INF = 0x3f3f3f3f;
-const int MOD = 1e9 + 7;
-int state[N][11], n, p, cap[N], st, ed;
+int st, ed;
 struct Maxflow {
-    int h[N], cnt, maxflow, deep[N], cur[N];
+    int h[N], cnt, deep[N], cur[N];
+    ll maxflow;
     struct Edge {
         int to, next;
         ll cap;
-    } e[M<<1];
+    } e[N<<1];
 
     void init() {
         memset(h, -1, sizeof h);
         cnt = maxflow = 0;
     }
-    void add(int u, int v, int cap) {
+    void add(int u, int v, ll cap) {
         e[cnt].to = v;
         e[cnt].cap = cap;
         e[cnt].next = h[u];
         h[u] = cnt++;
-
+        
         e[cnt].to = u;
         e[cnt].cap = 0;
         e[cnt].next = h[v];
@@ -64,10 +61,24 @@ struct Maxflow {
         ll res;
         while (bfs()) {
             while (1) {
-                res = dfs(st, INF);
+                res = dfs(st, inf);
                 if (!res) break;
                 maxflow += res;
             }
         }
+    }
+    int vis[N];
+    void construct(int x) {
+    	queue<int> q;
+    	q.push(x);
+    	while (q.size()) {
+    		int now = q.front();
+    		q.pop();
+    		vis[now] = 1;
+    		for (int i = h[now]; ~i; i = e[i].next) {
+    			int v = e[i].to;
+    			if (!vis[v] && e[i].cap) q.push(v);
+    		}
+    	}
     }
 }mf;
