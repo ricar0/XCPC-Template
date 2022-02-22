@@ -1,31 +1,29 @@
-int st, ed;
+template <typename T>
 struct Maxflow {
-    int h[N], cnt, deep[N], cur[N];
-    ll maxflow;
+	vector<int> h, deep, cur, vis;
+    int cnt, st, ed, n, m;
+    T maxflow;
     struct Edge {
         int to, next;
-        ll cap;
-    } e[N<<1];
-
-    void init() {
-        memset(h, -1, sizeof h);
-        cnt = maxflow = 0;
-    }
-    void add(int u, int v, ll cap) {
+        T cap;
+    };
+    vector<Edge> e;
+    Maxflow(int n, int m): n(n), m(m),e(m<<1),h(n, -1),deep(n),cur(n),vis(n),cnt(0),st(0),ed(0){}
+    void add(int u, int v, T cap) {
         e[cnt].to = v;
         e[cnt].cap = cap;
         e[cnt].next = h[u];
         h[u] = cnt++;
-        
+
         e[cnt].to = u;
         e[cnt].cap = 0;
         e[cnt].next = h[v];
         h[v] = cnt++;
-
     }
 
     bool bfs() {
-        for (int i = 0; i <= ed; i++) deep[i] = -1, cur[i] = h[i];
+    	deep.assign(n, -1);
+    	h=cur;
         queue<int> q; q.push(st); deep[st] = 0;
         while (q.size()) {
             int u = q.front();
@@ -42,8 +40,8 @@ struct Maxflow {
         else return false;
     }
 
-    ll dfs(int u, ll mx) {
-        ll a;
+    T dfs(int u, T mx) {
+        T a;
         if (u == ed) return mx;
         for (int i = cur[u]; ~i; i = e[i].next) {
             cur[u] = i;//优化
@@ -58,7 +56,7 @@ struct Maxflow {
     }
 
     void dinic() {
-        ll res;
+        T res;
         while (bfs()) {
             while (1) {
                 res = dfs(st, inf);
@@ -67,7 +65,6 @@ struct Maxflow {
             }
         }
     }
-    int vis[N];
     void construct(int x) {
     	queue<int> q;
     	q.push(x);
@@ -81,4 +78,4 @@ struct Maxflow {
     		}
     	}
     }
-}mf;
+};
