@@ -4,6 +4,7 @@ struct LinerBase {
     LinerBase() {
         memset(num, 0, sizeof num);
         memset(tmp, 0, sizeof tmp);
+        isZero = false;
     }
     void insert(ll x) {
         for (int i = MAX_BIT; i >= 0; i--) {
