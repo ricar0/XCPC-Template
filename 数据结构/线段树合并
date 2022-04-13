@@ -1,0 +1,67 @@
+template<typename T>
+struct Merge {
+    const int n;
+    int cnt;
+    vector<int> ls, rs, rt;
+    vector<T> sum, minn, maxx;
+    Merge(int n): n(n*50), ls(n*50), rs(n*50), rt(n*50), minn(n*50, inf), maxx(n*50, 0), sum(n*50), cnt(0) {}
+    void push_up(int now) {
+        sum[now] = sum[ls[now]] + sum[rs[now]];
+        minn[now] = min(minn[ls[now]], minn[rs[now]]);
+        maxx[now] = max(maxx[ls[now]], maxx[rs[now]]);
+    }
+    void modify(int &now, int l, int r, int pos, T val) {
+        if (!now) now = ++cnt;
+        if (l == r) {
+            sum[now] += val;
+            minn[now] = min(minn[now], val);
+            maxx[now] = max(maxx[now], val);
+            return;
+        }
+        int mid = (l + r) >> 1;
+        if (pos <= mid) modify(ls[now], l, mid, pos, val);
+        else modify(rs[now], mid+1, r, pos, val);
+        push_up(now);
+    }
+    void merge(int &u, int &v, int l, int r) {
+        if (!u || !v) {
+            u += v;
+            return;
+        }
+        if (l == r) {
+            sum[u] += sum[v];
+            maxx[u] = max(maxx[u], maxx[v]);
+            minn[u] = min(minn[u], minn[v]);
+            return;
+        }
+        int mid = (l + r) >> 1;
+        merge(ls[u], ls[v], l, mid);
+        merge(rs[u], rs[v], mid+1, r);
+        push_up(u);
+    }
+
+    T qrysum(int now, int l, int r, int ql, int qr) {
+        if (ql <= l && qr >= r) return sum[now];
+        int mid = (l + r) >> 1;
+        T ans = 0;
+        if (ql <= mid) ans += qrysum(ls[now], l, mid, ql, qr);
+        if (qr > mid) ans += qrysum(rs[now], mid+1, r, ql, qr);
+        return ans;
+    }
+    T qrymi(int now, int l, int r, int ql, int qr) {
+        if (ql <= l && qr >= r) return minn[now];
+        int mid = (l + r) >> 1;
+        T ans = inf;
+        if (ql <= mid) ans = min(ans, qrymi(ls[now], l, mid, ql, qr));
+        if (qr > mid) ans = min(ans, qrymi(rs[now], mid+1, r, ql, qr));
+        return ans;
+    }
+    T qryma(int now, int l, int r, int ql, int qr) {
+        if (ql <= l && qr >= r) return maxx[now];
+        int mid = (l + r) >> 1;
+        T ans = 0;
+        if (ql <= mid) ans = max(ans, qryma(ls[now], l, mid, ql, qr));
+        if (qr > mid) ans = max(ans, qryma(rs[now], mid+1, r, ql, qr));
+        return ans;
+    }
+};
